@@ -1,61 +1,44 @@
 package com.zemnitskiy.aggregatehub.model;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 
+/**
+ * Represents a user entity with validation rules for each field.
+ */
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
+
     @Id
+    @NotNull(message = "ID cannot be null")
     private String id;
+
+    @NotEmpty(message = "Username cannot be empty")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
+
+    @NotEmpty(message = "Name cannot be empty")
+    @Size(min = 1, max = 50, message = "Name must be between 1 and 50 characters")
     private String name;
+
+    @NotEmpty(message = "Surname cannot be empty")
+    @Size(min = 1, max = 50, message = "Surname must be between 1 and 50 characters")
     private String surname;
-
-    public User(String id, String username, String name, String surname) {
-        this.id = id;
-        this.username = username;
-        this.name = name;
-        this.surname = surname;
-    }
-
-    public User() {}
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
 
     @Override
     public boolean equals(Object object) {

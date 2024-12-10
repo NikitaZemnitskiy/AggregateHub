@@ -11,6 +11,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres-db-1-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "testuser" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres-db-2:
     image: postgres:latest
@@ -19,9 +24,14 @@ services:
       POSTGRES_PASSWORD: testpass
       POSTGRES_DB: db2
     ports:
-      - "5433:5432"  # Using a different external port to avoid conflict
+      - "5433:5432"
     volumes:
       - postgres-db-2-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "testuser" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mysql-db-1:
     image: mysql:latest
@@ -34,6 +44,11 @@ services:
       - "3306:3306"
     volumes:
       - mysql-db-1-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mysql-db-2:
     image: mysql:latest
@@ -43,7 +58,27 @@ services:
       MYSQL_USER: testuser
       MYSQL_PASSWORD: testpass
     ports:
-      - "3307:3306"  # Using a different external port to avoid conflict
+      - "3307:3306"
+    volumes:
+      - mysql-db-2-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  spring-boot-app:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - postgres-db-1
+      - postgres-db-2
+      - mysql-db-1
+      - mysql-db-2
 
 volumes:
   postgres-db-1-data:
