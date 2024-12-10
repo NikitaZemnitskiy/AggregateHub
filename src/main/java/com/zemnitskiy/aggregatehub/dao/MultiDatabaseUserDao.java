@@ -23,7 +23,6 @@ import java.util.Map;
 public class MultiDatabaseUserDao {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiDatabaseUserDao.class);
-
     private final Map<String, EntityManagerFactory> entityManagerFactoryMap;
 
     public MultiDatabaseUserDao(Map<String, EntityManagerFactory> entityManagerFactoryMap) {
@@ -36,67 +35,54 @@ public class MultiDatabaseUserDao {
      * @param user the user to be saved
      */
     public void saveUserToAllDatabases(User user) {
-        for (var entry : entityManagerFactoryMap.entrySet()) {
-            var dbName = entry.getKey();
-            var emf = entry.getValue();
-            var em = emf.createEntityManager();
-            em.getTransaction().begin();
-            try {
+        entityManagerFactoryMap.forEach((dbName, emf) -> {
+            try (EntityManager em = emf.createEntityManager()) {
+                em.getTransaction().begin();
                 em.persist(user);
                 em.getTransaction().commit();
                 logger.info("User saved to database: {}", dbName);
             } catch (PersistenceException ex) {
-                em.getTransaction().rollback();
                 logger.error("Error saving user to database '{}': {}", dbName, ex.getMessage(), ex);
-            } finally {
-                em.close();
             }
-        }
-    }
-
-    /**
-     * Retrieves all users from all configured databases with optional filtering.
-     *
-     * @param id       optional user ID to filter by
-     * @param name     optional username to filter by
-     * @param surname  optional user surname to filter by
-     * @param username optional username to filter by
-     * @return a list of users matching the provided criteria
-     */
-    public List<User> getAllUsersFromAllDatabases(String id, String name, String surname, String username) {
-        List<User> allUsers = new ArrayList<>();
-
-        for (var entry : entityManagerFactoryMap.entrySet()) {
-            var dbName = entry.getKey();
-            var emf = entry.getValue();
-            try (var em = emf.createEntityManager()) {
-                var users = fetchUsers(em, id, name, surname, username);
-                allUsers.addAll(users);
-                logger.info("Fetched {} users from database: {}", users.size(), dbName);
-            } catch (PersistenceException ex) {
-                logger.error("Error fetching users from database '{}': {}", dbName, ex.getMessage(), ex);
-            }
-        }
-
-        return allUsers;
+        });
     }
 
     /**
      * Fetches users from a specific database based on the given filters.
      *
-     * @param em       the EntityManager to use
+     * @param dbName   the database name
      * @param id       optional user ID to filter by
      * @param name     optional username to filter by
      * @param surname  optional user surname to filter by
      * @param username optional username to filter by
-     * @return a list of users matching the provided criteria from the specified database
+     * @return a list of users matching the criteria
      */
-    private List<User> fetchUsers(EntityManager em, String id, String name, String surname, String username) {
-        var cb = em.getCriteriaBuilder();
-        var cq = cb.createQuery(User.class);
-        var root = cq.from(User.class);
+    public List<User> fetchUsersFromDatabase(String dbName, String id, String name, String surname, String username) {
+        EntityManagerFactory emf = entityManagerFactoryMap.get(dbName);
+        if (emf == null) {
+            logger.error("EntityManagerFactory not found for database '{}'", dbName);
+            return new ArrayList<>();
+        }
 
-        var predicates = buildPredicates(cb, root, id, name, surname, username);
+        try (EntityManager em = emf.createEntityManager()) {
+            return fetchUsers(em, id, name, surname, username);
+        } catch (PersistenceException ex) {
+            logger.error("Error fetching users from database '{}': {}", dbName, ex.getMessage(), ex);
+            return new ArrayList<>();
+        }
+    }
+
+    private List<User> fetchUsers(EntityManager em, String id, String name, String surname, String username) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        var cq = cb.createQuery(User.class);
+        Root<User> root = cq.from(User.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+        if (id != null) predicates.add(cb.equal(root.get("id"), id));
+        if (name != null) predicates.add(cb.equal(root.get("name"), name));
+        if (surname != null) predicates.add(cb.equal(root.get("surname"), surname));
+        if (username != null) predicates.add(cb.equal(root.get("username"), username));
+
         if (!predicates.isEmpty()) {
             cq.where(cb.and(predicates.toArray(new Predicate[0])));
         }
@@ -104,37 +90,7 @@ public class MultiDatabaseUserDao {
         return em.createQuery(cq).getResultList();
     }
 
-    /**
-     * Builds a list of JPA Criteria Predicates based on the provided filter parameters.
-     *
-     * @param cb       the CriteriaBuilder
-     * @param root     the Root<User> for the query
-     * @param id       optional user ID to filter by
-     * @param name     optional username to filter by
-     * @param surname  optional user surname to filter by
-     * @param username optional username to filter by
-     * @return a list of Predicates to apply to the query
-     */
-    private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<User> root, String id, String name, String surname, String username) {
-        List<Predicate> predicates = new ArrayList<>();
-
-        if (isNotBlank(id)) {
-            predicates.add(cb.equal(root.get("id"), id));
-        }
-        if (isNotBlank(name)) {
-            predicates.add(cb.equal(root.get("name"), name));
-        }
-        if (isNotBlank(surname)) {
-            predicates.add(cb.equal(root.get("surname"), surname));
-        }
-        if (isNotBlank(username)) {
-            predicates.add(cb.equal(root.get("username"), username));
-        }
-
-        return predicates;
-    }
-
-    private boolean isNotBlank(String str) {
-        return str != null && !str.isBlank();
+    public List<String> getDatabaseNames() {
+        return new ArrayList<>(entityManagerFactoryMap.keySet());
     }
 }
