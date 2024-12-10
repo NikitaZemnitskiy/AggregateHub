@@ -43,8 +43,7 @@ public class MultiDatabaseUserDao {
     public List<User> getAllUsersFromAllDatabases(String id, String name, String surname, String username) {
         List<User> allUsers = new ArrayList<>();
         for (String dbName : entityManagerFactoryMap.keySet()) {
-            EntityManager em = entityManagerFactoryMap.get(dbName).createEntityManager();
-            try {
+            try (EntityManager em = entityManagerFactoryMap.get(dbName).createEntityManager()) {
                 CriteriaBuilder cb = em.getCriteriaBuilder();
                 CriteriaQuery<User> cq = cb.createQuery(User.class);
                 Root<User> root = cq.from(User.class);
@@ -72,8 +71,6 @@ public class MultiDatabaseUserDao {
                 System.out.println("Fetched users from " + dbName);
             } catch (PersistenceException ex) {
                 System.err.println("Error fetching users from " + dbName + ": " + ex.getMessage());
-            } finally {
-                em.close();
             }
         }
         return allUsers;
