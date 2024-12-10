@@ -1,4 +1,4 @@
-package com.zemnitskiy.aggregatehub.naming;
+package com.zemnitskiy.aggregatehub.repository.naming;
 
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;

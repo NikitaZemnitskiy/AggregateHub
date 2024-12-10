@@ -1,7 +1,7 @@
 package com.zemnitskiy.aggregatehub.repository;
 
 import com.zemnitskiy.aggregatehub.config.DatabaseListConfig;
-import com.zemnitskiy.aggregatehub.naming.CustomPhysicalNamingStrategy;
+import com.zemnitskiy.aggregatehub.repository.naming.CustomPhysicalNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
