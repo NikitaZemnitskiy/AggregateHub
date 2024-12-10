@@ -25,13 +25,13 @@ public class UserController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             })
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        try {
-            List<User> users = userAggregationService.getAllUsersFromAllDatabases();
-            return ResponseEntity.ok(users);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+    public List<User> getAllUsers(
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String surname,
+            @RequestParam(required = false) String username
+    ) {
+        return userAggregationService.getAllUsersFromAllDatabases(id, name, surname, username);
     }
 
     @PostMapping("/save")

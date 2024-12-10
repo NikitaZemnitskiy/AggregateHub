@@ -9,15 +9,16 @@ import java.util.HashMap;
 
 public class CustomPhysicalNamingStrategy extends PhysicalNamingStrategyStandardImpl {
 
+    private final Map<String, String> tableMapping;
     private final Map<String, String> columnMapping;
 
-    public CustomPhysicalNamingStrategy(String mappingString) {
-        this.columnMapping = parseMappingString(mappingString);
+    public CustomPhysicalNamingStrategy(String tableMappingString, String columnMappingString) {
+        this.tableMapping = parseMappingString(tableMappingString);
+        this.columnMapping = parseMappingString(columnMappingString);
     }
 
     private Map<String, String> parseMappingString(String mappingString) {
         Map<String, String> map = new HashMap<>();
-        //  mappingString: "{id=MySql2id, username=Mysql2Username, name=Mysql2Name, surname=Mysql2Surname}"
         if (mappingString == null || mappingString.isEmpty()) {
             return map;
         }
@@ -38,13 +39,31 @@ public class CustomPhysicalNamingStrategy extends PhysicalNamingStrategyStandard
     }
 
     @Override
+    public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment context) {
+        if (name == null) {
+            return null;
+        }
+
+        String logicalName = name.getText();
+        String mappedName = tableMapping.get(logicalName);
+        if (mappedName != null) {
+            System.out.println("Mapping table '" + logicalName + "' to '" + mappedName + "'");
+            return Identifier.toIdentifier(mappedName);
+        }
+
+        return super.toPhysicalTableName(name, context);
+    }
+
+    @Override
     public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment context) {
         if (name == null) {
             return null;
         }
 
-        String mappedName = columnMapping.get(name.getText());
+        String logicalName = name.getText();
+        String mappedName = columnMapping.get(logicalName);
         if (mappedName != null) {
+            System.out.println("Mapping column '" + logicalName + "' to '" + mappedName + "'");
             return Identifier.toIdentifier(mappedName);
         }
 

@@ -8,5 +8,5 @@ import java.util.Map;
 
 public interface DatabaseStrategy {
     DataSource createDataSource(DatabaseListConfig.DatabaseConfig config);
-    LocalContainerEntityManagerFactoryBean createEntityManagerFactory(DataSource dataSource, String persistenceUnitName, Map<String, String> properties);
+    LocalContainerEntityManagerFactoryBean createEntityManagerFactory(DataSource dataSource, String persistenceUnitName, Map<String, String> properties, String tableName);
 }

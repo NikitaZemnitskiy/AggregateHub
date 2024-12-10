@@ -1,10 +1,10 @@
 package com.zemnitskiy.aggregatehub.repository.mysql;
 
-import com.zemnitskiy.aggregatehub.naming.CustomPhysicalNamingStrategy;
 import com.zemnitskiy.aggregatehub.config.DatabaseListConfig.DatabaseConfig;
+import com.zemnitskiy.aggregatehub.naming.CustomPhysicalNamingStrategy;
 import com.zemnitskiy.aggregatehub.repository.DatabaseStrategy;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class MySqlStrategy implements DatabaseStrategy {
     }
 
     @Override
-    public LocalContainerEntityManagerFactoryBean createEntityManagerFactory(DataSource dataSource, String persistenceUnitName, Map<String, String> mapping) {
+    public LocalContainerEntityManagerFactoryBean createEntityManagerFactory(DataSource dataSource, String persistenceUnitName, Map<String, String> mapping, String tableName) {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);
         emf.setPackagesToScan("com.zemnitskiy.aggregatehub.model");
@@ -42,10 +42,11 @@ public class MySqlStrategy implements DatabaseStrategy {
         jpaProperties.put("hibernate.show_sql", "true");
         jpaProperties.put("hibernate.format_sql", "true");
 
-        if (mapping!= null){
-            CustomPhysicalNamingStrategy namingStrategy = new CustomPhysicalNamingStrategy(mapping.toString());
-            jpaProperties.put("hibernate.physical_naming_strategy", namingStrategy);
-        }
+        String tableMappingString = tableName == null ? null : "users=" + tableName;
+        String columnMappingString = mapping.toString();
+
+        CustomPhysicalNamingStrategy namingStrategy = new CustomPhysicalNamingStrategy(tableMappingString, columnMappingString);
+        jpaProperties.put("hibernate.physical_naming_strategy", namingStrategy);
 
         emf.setJpaProperties(jpaProperties);
 

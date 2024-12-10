@@ -21,8 +21,8 @@ public class UserService {
         userDao.saveUserToAllDatabases(user);
     }
 
-    public List<User> getAllUsersFromAllDatabases() {
-        return userDao.getAllUsersFromAllDatabases();
+    public List<User> getAllUsersFromAllDatabases(String id, String name, String surname, String username) {
+        return userDao.getAllUsersFromAllDatabases(id, name, surname, username);
     }
 
 }
