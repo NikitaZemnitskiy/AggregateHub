@@ -1,87 +1,98 @@
-version: '3'
+  version: '3'
 
-services:
-  postgres-db-1:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testpass
-      POSTGRES_DB: db1
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-db-1-data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "testuser" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  services:
+    postgres-db-1:
+      image: postgres:latest
+      environment:
+        POSTGRES_USER: testuser
+        POSTGRES_PASSWORD: testpass
+        POSTGRES_DB: db1
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres-db-1-data:/var/lib/postgresql/data
+        - ./init-scripts/init-postgres-db-1.sql:/docker-entrypoint-initdb.d/init-postgres-db-1.sql
+      healthcheck:
+        test: [ "CMD", "pg_isready", "-U", "testuser" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
-  postgres-db-2:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testpass
-      POSTGRES_DB: db2
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres-db-2-data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "testuser" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    postgres-db-2:
+      image: postgres:latest
+      environment:
+        POSTGRES_USER: testuser
+        POSTGRES_PASSWORD: testpass
+        POSTGRES_DB: db2
+      ports:
+        - "5433:5432"
+      volumes:
+        - postgres-db-2-data:/var/lib/postgresql/data
+        - ./init-scripts/init-postgres-db-2.sql:/docker-entrypoint-initdb.d/init-postgres-db-2.sql
+      healthcheck:
+        test: [ "CMD", "pg_isready", "-U", "testuser" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
-  mysql-db-1:
-    image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: db1
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: testpass
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-db-1-data:/var/lib/mysql
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    mysql-db-1:
+      image: mysql:latest
+      environment:
+        MYSQL_ROOT_PASSWORD: rootpass
+        MYSQL_DATABASE: db1
+        MYSQL_USER: testuser
+        MYSQL_PASSWORD: testpass
+      ports:
+        - "3306:3306"
+      volumes:
+        - mysql-db-1-data:/var/lib/mysql
+        - ./init-scripts/init-mysql-db-1.sql:/docker-entrypoint-initdb.d/init-mysql-db-1.sql
+      command: mysqld --init-file="/docker-entrypoint-initdb.d/init-mysql-db-1.sql"
+      healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
-  mysql-db-2:
-    image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: db2
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: testpass
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql-db-2-data:/var/lib/mysql
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    mysql-db-2:
+      image: mysql:latest
+      environment:
+        MYSQL_ROOT_PASSWORD: rootpass
+        MYSQL_DATABASE: db2
+        MYSQL_USER: testuser
+        MYSQL_PASSWORD: testpass
+      ports:
+        - "3307:3306"
+      volumes:
+        - mysql-db-2-data:/var/lib/mysql
+        - ./init-scripts/init-mysql-db-2.sql:/docker-entrypoint-initdb.d/init-mysql-db-2.sql
+      command: mysqld --init-file="/docker-entrypoint-initdb.d/init-mysql-db-2.sql"
+      healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
-  spring-boot-app:
-    build:
-      context: .
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-    depends_on:
-      - postgres-db-1
-      - postgres-db-2
-      - mysql-db-1
-      - mysql-db-2
+    spring-boot-app:
+      build:
+        context: .
+      ports:
+        - "8080:8080"
+      environment:
+        SPRING_PROFILES_ACTIVE: docker
+      depends_on:
+        postgres-db-1:
+          condition: service_healthy
+        postgres-db-2:
+          condition: service_healthy
+        mysql-db-1:
+          condition: service_healthy
+        mysql-db-2:
+          condition: service_healthy
 
-volumes:
-  postgres-db-1-data:
-  postgres-db-2-data:
-  mysql-db-1-data:
-  mysql-db-2-data:
+
+  volumes:
+    postgres-db-1-data:
+    postgres-db-2-data:
+    mysql-db-1-data:
+    mysql-db-2-data:

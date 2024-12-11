@@ -70,11 +70,11 @@ public class MultiDatabaseConfig {
 
             // Prepare entity mapping
             Map<String, String> mapping = dbConfig.mapping() != null ? new HashMap<>(dbConfig.mapping()) : new HashMap<>();
-            mapping.put("table", dbConfig.table()!= null && !dbConfig.table().isEmpty() ? dbConfig.table() : "users");
+            String table = dbConfig.table()!= null && !dbConfig.table().isEmpty() ? dbConfig.table() : "users";
 
             // Create and store EntityManagerFactory
             LocalContainerEntityManagerFactoryBean emfBean = strategy.createEntityManagerFactory(
-                    dataSource, dbConfig.name() + "PU", mapping, mapping.get("table"));
+                    dataSource, dbConfig.name() + "PU", mapping, table);
             emfBean.afterPropertiesSet();
             EntityManagerFactory emf = emfBean.getObject();
             entityManagerFactoryMap.put(dbConfig.name(), emf);
