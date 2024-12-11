@@ -22,7 +22,7 @@ public class UserService {
 
     private final MultiDatabaseUserDao userDao;
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    private static final Duration TIMEOUT = Duration.ofSeconds(5); // 5 seconds timeout
+    private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
     public UserService(MultiDatabaseUserDao userDao) {
         this.userDao = userDao;
@@ -45,7 +45,7 @@ public class UserService {
 
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         try {
-            allFutures.get(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+            allFutures.get(TIMEOUT.toSeconds(), TimeUnit.SECONDS);
             return futures.stream()
                     .map(listCompletableFuture -> {
                         try {
