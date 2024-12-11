@@ -52,9 +52,8 @@ public class MultiDatabaseConfig {
     public void init() {
         logger.info("Initializing MultiDatabaseConfig with available strategies: {}", databaseStrategies.keySet());
 
-        for (DatabaseConfig dbConfig : databaseListConfig.getDataSources()) {
-            System.out.println(databaseListConfig);
-            String type = dbConfig.getStrategy().toLowerCase();
+        for (DatabaseConfig dbConfig : databaseListConfig.dataSources()) {
+            String type = dbConfig.strategy().toLowerCase();
             DatabaseStrategy strategy = databaseStrategies.get(type);
 
             if (strategy == null) {
@@ -62,25 +61,24 @@ public class MultiDatabaseConfig {
                 throw new IllegalArgumentException("No strategy found for database type: " + type);
             }
 
-            logger.info("Configuring database: {} of type: {}", dbConfig.getName(), type);
+            logger.info("Configuring database: {} of type: {}", dbConfig.name(), type);
 
             // Create and store DataSource
             DataSource dataSource = strategy.createDataSource(dbConfig);
-            dataSourceMap.put(dbConfig.getName(), dataSource);
-            logger.info("DataSource created for {}", dbConfig.getName());
+            dataSourceMap.put(dbConfig.name(), dataSource);
+            logger.info("DataSource created for {}", dbConfig.name());
 
             // Prepare entity mapping
-            Map<String, String> mapping = dbConfig.getMapping() != null ? new HashMap<>(dbConfig.getMapping()) : new HashMap<>();
-            mapping.put("table", dbConfig.getTable() != null && !dbConfig.getTable().isEmpty() ? dbConfig.getTable() : "users");
+            Map<String, String> mapping = dbConfig.mapping() != null ? new HashMap<>(dbConfig.mapping()) : new HashMap<>();
+            mapping.put("table", dbConfig.table()!= null && !dbConfig.table().isEmpty() ? dbConfig.table() : "users");
 
             // Create and store EntityManagerFactory
             LocalContainerEntityManagerFactoryBean emfBean = strategy.createEntityManagerFactory(
-                    dataSource, dbConfig.getName() + "PU", mapping, mapping.get("table"));
+                    dataSource, dbConfig.name() + "PU", mapping, mapping.get("table"));
             emfBean.afterPropertiesSet();
-
             EntityManagerFactory emf = emfBean.getObject();
-            entityManagerFactoryMap.put(dbConfig.getName(), emf);
-            logger.info("Configured EntityManagerFactory for: {}", dbConfig.getName());
+            entityManagerFactoryMap.put(dbConfig.name(), emf);
+            logger.info("Configured EntityManagerFactory for: {}", dbConfig.name());
         }
     }
 

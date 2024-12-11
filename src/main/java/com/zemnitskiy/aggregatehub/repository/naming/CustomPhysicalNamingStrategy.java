@@ -20,44 +20,10 @@ public class CustomPhysicalNamingStrategy extends PhysicalNamingStrategyStandard
     private final Map<String, String> tableMapping;
     private final Map<String, String> columnMapping;
 
-    /**
-     * Constructor to initialize table and column mappings from strings.
-     *
-     * @param tableMappingString  the mapping string for tables in the format "{key1=value1, key2=value2}"
-     * @param columnMappingString the mapping string for columns in the format "{key1=value1, key2=value2}"
-     */
+
     public CustomPhysicalNamingStrategy(String tableMappingString, String columnMappingString) {
         this.tableMapping = parseMappingString(tableMappingString);
         this.columnMapping = parseMappingString(columnMappingString);
-        logger.info("Initialized CustomPhysicalNamingStrategy with table mappings: {} and column mappings: {}",
-                tableMapping, columnMapping);
-    }
-
-    /**
-     * Parses a mapping string in the format "{key1=value1, key2=value2}" into a map.
-     *
-     * @param mappingString the mapping string to parse
-     * @return a map containing the parsed key-value pairs
-     */
-    private Map<String, String> parseMappingString(String mappingString) {
-        Map<String, String> map = new HashMap<>();
-        if (mappingString == null || mappingString.isEmpty()) {
-            return map;
-        }
-
-        mappingString = mappingString.trim();
-        if (mappingString.startsWith("{") && mappingString.endsWith("}")) {
-            mappingString = mappingString.substring(1, mappingString.length() - 1);
-        }
-
-        String[] entries = mappingString.split(", ");
-        for (String entry : entries) {
-            String[] kv = entry.split("=");
-            if (kv.length == 2) {
-                map.put(kv[0].trim(), kv[1].trim());
-            }
-        }
-        return map;
     }
 
     /**
@@ -104,5 +70,26 @@ public class CustomPhysicalNamingStrategy extends PhysicalNamingStrategyStandard
         }
 
         return super.toPhysicalColumnName(name, context);
+    }
+
+    private Map<String, String> parseMappingString(String mappingString) {
+        Map<String, String> map = new HashMap<>();
+        if (mappingString == null || mappingString.isEmpty()) {
+            return map;
+        }
+
+        mappingString = mappingString.trim();
+        if (mappingString.startsWith("{") && mappingString.endsWith("}")) {
+            mappingString = mappingString.substring(1, mappingString.length() - 1);
+        }
+
+        String[] entries = mappingString.split(", ");
+        for (String entry : entries) {
+            String[] kv = entry.split("=");
+            if (kv.length == 2) {
+                map.put(kv[0].trim(), kv[1].trim());
+            }
+        }
+        return map;
     }
 }

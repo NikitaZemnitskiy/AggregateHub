@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +23,7 @@ import java.util.List;
 
 /**
  * REST controller for managing users across multiple databases.
- * Provides endpoints to retrieve and save users.
+ * Provides endpoints to retrieve users.
  */
 @RestController
 @RequestMapping("/users")
@@ -87,58 +85,6 @@ public class UserController {
             return ResponseEntity.ok(users);
         } catch (Exception e) {
             logger.error("Error retrieving users: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    /**
-     * Saves a user to all connected databases.
-     *
-     * @param user the user to be saved
-     * @return the saved user if successful
-     */
-    @Operation(
-            summary = "Save a user to all connected databases",
-            description = "Persists a user entity across all configured databases."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "User successfully saved",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = User.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid user data provided",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error while saving user",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
-    @PostMapping("/save")
-    public ResponseEntity<User> saveUser(
-            @Parameter(description = "User object to be saved", required = true,
-                    content = @Content(schema = @Schema(implementation = User.class)))
-            @RequestBody User user
-    ) {
-        logger.info("Received request to save user: {}", user);
-        try {
-            userAggregationService.saveUserToAllDatabases(user);
-            logger.info("User saved successfully: {}", user);
-            return ResponseEntity.ok(user);
-        } catch (IllegalArgumentException e) {
-            logger.warn("Invalid user data: {}", e.getMessage());
-            // Return a 400 Bad Request if the user data is invalid
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            logger.error("Error saving user: {}", e.getMessage(), e);
-            // Return a 500 Internal Server Error for unexpected issues
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

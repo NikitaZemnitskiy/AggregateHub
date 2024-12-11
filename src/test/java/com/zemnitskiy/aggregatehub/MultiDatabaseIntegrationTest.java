@@ -1,11 +1,15 @@
 package com.zemnitskiy.aggregatehub;
 
 import com.zemnitskiy.aggregatehub.model.User;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
@@ -14,9 +18,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -140,27 +145,6 @@ class MultiDatabaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("Add User via Endpoint and Verify in All Databases")
-    void testAddUserViaEndpoint() {
-        // Create a new user
-        User user = new User();
-        user.setId("1");
-        user.setName("John");
-        user.setSurname("Doe");
-        user.setUsername("johndoe");
-
-        // Send a POST request to add the user via the endpoint
-        ResponseEntity<Void> response = restTemplate.postForEntity("/users/save", user, Void.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        // Verify that the user is added to all databases
-        verifyUserInDatabase("postgres-db-1", "1", user);
-        verifyUserInDatabase("postgres-db-2", "1", user);
-        verifyUserInDatabase("mysql-db-1",  "1", user);
-        verifyUserInDatabase("mysql-db-2",  "1", user);
-    }
-
-    @Test
     @DisplayName("Retrieve Users via REST API")
     void testRetrieveUsersViaApi() {
         // Add users directly to the databases
@@ -257,32 +241,6 @@ class MultiDatabaseIntegrationTest {
         assertThat(users).isNotNull().contains(
                 user, user, user, user
         );
-    }
-
-    /**
-     * Helper method to verify the presence of a user in the specified database.
-     *
-     * @param dbName       The name of the database.
-     * @param idValue      The ID value to search for.
-     * @param expectedUser The expected user object.
-     */
-    private void verifyUserInDatabase(String dbName, String idValue, User expectedUser) {
-        try (Connection conn = getConnection(dbName)) {
-            String tableName = getTableName(dbName);
-            String idColumn = getMappedColumnName(dbName, "id");
-            Statement stmt = conn.createStatement();
-            String query = String.format("SELECT * FROM %s WHERE %s = '%s'", tableName, idColumn, idValue);
-            ResultSet rs = stmt.executeQuery(query);
-            assertThat(rs.next()).isTrue();
-            assertThat(rs.getString(idColumn)).isEqualTo(expectedUser.getId());
-            assertThat(rs.getString(getMappedColumnName(dbName, "name"))).isEqualTo(expectedUser.getName());
-            assertThat(rs.getString(getMappedColumnName(dbName, "surname"))).isEqualTo(expectedUser.getSurname());
-            assertThat(rs.getString(getMappedColumnName(dbName, "username"))).isEqualTo(expectedUser.getUsername());
-            rs.close();
-            stmt.close();
-        } catch (Exception e) {
-            Assertions.fail("Error verifying user in " + dbName + ": " + e.getMessage());
-        }
     }
 
     /**

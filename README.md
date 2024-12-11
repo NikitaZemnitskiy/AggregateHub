@@ -71,24 +71,12 @@ The REST API is documented using OpenAPI (Swagger). After starting the applicati
 http://localhost:8080/swagger-ui.html
 ```
 
-### Endpoints:
+### Endpoint:
 - **GET /users** - Fetches users from all databases. Optional parameters for filtering:
    - `id`
    - `username`
    - `name`
    - `surname`
-
-- **POST /users/save** - Saves a user to all connected databases. Here's an example JSON body for creating a user:
-
-  ```json
-  {
-      "id": "0",
-      "name": "Nikita",
-      "surname": "Zemnitskiy",
-      "username": "nikZemnitskiy"
-  }
-  ```
-
 
 ## Running the Application
 

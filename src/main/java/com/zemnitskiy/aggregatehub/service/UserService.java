@@ -4,13 +4,11 @@ import com.zemnitskiy.aggregatehub.dao.MultiDatabaseUserDao;
 import com.zemnitskiy.aggregatehub.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -22,27 +20,8 @@ public class UserService {
     private final MultiDatabaseUserDao userDao;
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
     public UserService(MultiDatabaseUserDao userDao) {
         this.userDao = userDao;
-    }
-
-    /**
-     * Saves a user to all available databases.
-     *
-     * @param user the user object to be saved
-     */
-    public void saveUserToAllDatabases(User user) {
-        if (user != null) {
-            try {
-                logger.info("Saving user to all databases: {}", user);
-                userDao.saveUserToAllDatabases(user);
-            } catch (Exception e) {
-                logger.error("Error saving user to all databases: {}", e.getMessage(), e);
-            }
-        } else {
-            logger.warn("Attempted to save a null user to databases.");
-        }
     }
 
     /**
@@ -73,7 +52,7 @@ public class UserService {
                             return Stream.empty();
                         }
                     })
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Error while waiting for all database queries to complete: {}", e.getMessage(), e);
             Thread.currentThread().interrupt();

@@ -30,12 +30,12 @@ public class MySqlStrategy implements DatabaseStrategy {
      */
     @Override
     public DataSource createDataSource(DatabaseConfig config) {
-        logger.info("Creating MySQL DataSource with URL: {}", config.getUrl());
+        logger.info("Creating MySQL DataSource with URL: {}", config.url());
         return DataSourceBuilder.create()
                 .driverClassName(DRIVER)
-                .url(config.getUrl())
-                .username(config.getUser())
-                .password(config.getPassword())
+                .url(config.url())
+                .username(config.user())
+                .password(config.password())
                 .build();
     }
 

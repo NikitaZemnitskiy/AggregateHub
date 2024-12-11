@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: AggregateHub
+
+  server:
+    port: 8080
+
+  logging:
+    level:
+      org.springframework.boot.context.properties: DEBUG
+      org.springframework.boot.autoconfigure: INFO
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+aggregate-hub:
+  data-sources:
+    - name: postgres-db-1
+      strategy: postgres
+      url: jdbc:postgresql://postgres-db-1:5432/db1
+      user: testuser
+      table: postgres_db_1_users
+      password: testpass
+      mapping:
+        id: postgres1_user_id
+        username: postgres1_user_username
+        name: postgres1_user_name
+        surname: postgres1_user_surname
+
+    - name: postgres-db-2
+      strategy: postgres
+      url: jdbc:postgresql://postgres-db-2:5432/db2
+      user: testuser
+      password: testpass
+
+    - name: mysql-db-1
+      strategy: mysql
+      url: jdbc:mysql://mysql-db-1:3306/db1
+      user: testuser
+      password: testpass
+
+    - name: mysql-db-2
+      strategy: mysql
+      url: jdbc:mysql://mysql-db-2:3306/db2
+      user: testuser
+      password: testpass
+      table: mysql_db_2_user
+      mapping:
+        id: MySql2id
+        username: Mysql2Username
+        name: Mysql2Name
+        surname: Mysql2Surname

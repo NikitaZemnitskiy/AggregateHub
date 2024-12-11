@@ -30,24 +30,6 @@ public class MultiDatabaseUserDao {
     }
 
     /**
-     * Saves a user to all configured databases.
-     *
-     * @param user the user to be saved
-     */
-    public void saveUserToAllDatabases(User user) {
-        entityManagerFactoryMap.forEach((dbName, emf) -> {
-            try (EntityManager em = emf.createEntityManager()) {
-                em.getTransaction().begin();
-                em.persist(user);
-                em.getTransaction().commit();
-                logger.info("User saved to database: {}", dbName);
-            } catch (PersistenceException ex) {
-                logger.error("Error saving user to database '{}': {}", dbName, ex.getMessage(), ex);
-            }
-        });
-    }
-
-    /**
      * Fetches users from a specific database based on the given filters.
      *
      * @param dbName   the database name
