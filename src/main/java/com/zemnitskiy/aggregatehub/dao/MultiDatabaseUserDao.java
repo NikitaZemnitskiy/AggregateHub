@@ -1,9 +1,9 @@
 package com.zemnitskiy.aggregatehub.dao;
 
+import com.zemnitskiy.aggregatehub.exception.AggregateHubDatabaseFetchException;
 import com.zemnitskiy.aggregatehub.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Data Access Object for User entities across multiple databases.
@@ -30,28 +31,30 @@ public class MultiDatabaseUserDao {
     }
 
     /**
-     * Fetches users from a specific database based on the given filters.
+     * Fetches users from a specific database asynchronously based on the given filters.
      *
      * @param dbName   the database name
      * @param id       optional user ID to filter by
      * @param name     optional username to filter by
      * @param surname  optional user surname to filter by
      * @param username optional username to filter by
-     * @return a list of users matching the criteria
+     * @return a CompletableFuture containing a list of users matching the criteria
      */
-    public List<User> fetchUsersFromDatabase(String dbName, String id, String name, String surname, String username) {
-        EntityManagerFactory emf = entityManagerFactoryMap.get(dbName);
-        if (emf == null) {
-            logger.error("EntityManagerFactory not found for database '{}'", dbName);
-            return new ArrayList<>();
-        }
+    public CompletableFuture<List<User>> fetchUsersFromDatabaseAsync(String dbName, String id, String name, String surname, String username) {
+        return CompletableFuture.supplyAsync(() -> {
+            EntityManagerFactory emf = entityManagerFactoryMap.get(dbName);
+            if (emf == null) {
+                logger.error("EntityManagerFactory not found for database '{}'", dbName);
+                throw new AggregateHubDatabaseFetchException("EntityManagerFactory not found for database: " + dbName);
+            }
 
-        try (EntityManager em = emf.createEntityManager()) {
-            return fetchUsers(em, id, name, surname, username);
-        } catch (PersistenceException ex) {
-            logger.error("Error fetching users from database '{}': {}", dbName, ex.getMessage(), ex);
-            return new ArrayList<>();
-        }
+            try (EntityManager em = emf.createEntityManager()) {
+                return fetchUsers(em, id, name, surname, username);
+            } catch (Exception ex) {
+                logger.error("Error fetching users from database '{}': {}", dbName, ex.getMessage(), ex);
+                throw new AggregateHubDatabaseFetchException("Error fetching users from database: " + dbName, ex);
+            }
+        });
     }
 
     private List<User> fetchUsers(EntityManager em, String id, String name, String surname, String username) {

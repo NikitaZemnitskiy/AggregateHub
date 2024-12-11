@@ -1,5 +1,6 @@
 package com.zemnitskiy.aggregatehub.controller;
 
+import com.zemnitskiy.aggregatehub.exception.ErrorResponse;
 import com.zemnitskiy.aggregatehub.model.User;
 import com.zemnitskiy.aggregatehub.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,16 +9,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -58,6 +53,12 @@ public class UserController {
                             schema = @Schema(implementation = User.class))
             ),
             @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad request due to invalid parameters",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
                     responseCode = "500",
                     description = "Internal server error while retrieving users",
                     content = @Content(mediaType = "application/json",
@@ -79,27 +80,8 @@ public class UserController {
             @RequestParam(required = false) String username
     ) {
         logger.info("Received request to retrieve users with filters - id: {}, name: {}, surname: {}, username: {}", id, name, surname, username);
-        try {
-            List<User> users = userAggregationService.getAllUsersFromAllDatabases(id, name, surname, username);
-            logger.info("Successfully retrieved {} users", users.size());
-            return ResponseEntity.ok(users);
-        } catch (Exception e) {
-            logger.error("Error retrieving users: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    /**
-     * Inner class representing an error response.
-     */
-    @Schema(description = "Error response containing message and details")
-    @Getter
-    @Setter
-    static class ErrorResponse {
-        @Schema(description = "Error message", example = "Invalid user data provided")
-        private String message;
-
-        @Schema(description = "Detailed error information", example = "Username cannot be empty")
-        private String details;
+        List<User> users = userAggregationService.getAllUsersFromAllDatabases(id, name, surname, username);
+        logger.info("Successfully retrieved {} users", users.size());
+        return ResponseEntity.ok(users);
     }
 }
