@@ -1,4 +1,4 @@
-package com.zemnitskiy.aggregatehub.dao;
+package com.zemnitskiy.aggregatehub.repository;
 
 import com.zemnitskiy.aggregatehub.exception.AggregateHubDatabaseFetchException;
 import com.zemnitskiy.aggregatehub.model.User;

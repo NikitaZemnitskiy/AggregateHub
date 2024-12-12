@@ -1,7 +1,7 @@
 package com.zemnitskiy.aggregatehub.config;
 
 import com.zemnitskiy.aggregatehub.config.DatabaseListConfig.DatabaseConfig;
-import com.zemnitskiy.aggregatehub.repository.DatabaseStrategy;
+import com.zemnitskiy.aggregatehub.strategy.DatabaseStrategy;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
 import org.slf4j.Logger;

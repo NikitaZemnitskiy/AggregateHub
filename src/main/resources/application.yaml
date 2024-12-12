@@ -15,6 +15,14 @@ spring:
     hibernate:
       ddl-auto: none
 
+database-strategies:
+  mysql:
+    driver: com.mysql.cj.jdbc.Driver
+    dialect: org.hibernate.dialect.MySQL8Dialect
+  postgres:
+    driver: org.postgresql.Driver
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+
 aggregate-hub:
   data-sources:
     - name: postgres-db-1

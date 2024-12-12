@@ -1,9 +1,10 @@
-package com.zemnitskiy.aggregatehub.repository.mysql;
+package com.zemnitskiy.aggregatehub.strategy.mysql;
 
 import com.zemnitskiy.aggregatehub.config.DatabaseListConfig.DatabaseConfig;
-import com.zemnitskiy.aggregatehub.repository.DatabaseStrategy;
+import com.zemnitskiy.aggregatehub.strategy.DatabaseStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +18,13 @@ import java.util.Properties;
 @Component("mysql")
 public class MySqlStrategy implements DatabaseStrategy {
 
-    private static final Logger logger = LoggerFactory.getLogger(MySqlStrategy.class);
+    @Value("${database-strategies.mysql.driver}")
+    private String driver;
 
-    public static final String DIALECT = "org.hibernate.dialect.MySQL8Dialect";
-    public static final String DRIVER = "com.mysql.cj.jdbc.Driver";
+    @Value("${database-strategies.mysql.dialect}")
+    private String dialect;
+
+    private static final Logger logger = LoggerFactory.getLogger(MySqlStrategy.class);
 
     /**
      * Creates a {@link DataSource} instance for MySQL using the provided {@link DatabaseConfig}.
@@ -32,7 +36,7 @@ public class MySqlStrategy implements DatabaseStrategy {
     public DataSource createDataSource(DatabaseConfig config) {
         logger.info("Creating MySQL DataSource with URL: {}", config.url());
         return DataSourceBuilder.create()
-                .driverClassName(DRIVER)
+                .driverClassName(driver)
                 .url(config.url())
                 .username(config.user())
                 .password(config.password())
@@ -48,7 +52,7 @@ public class MySqlStrategy implements DatabaseStrategy {
     @Override
     public Properties getJpaProperties() {
         Properties jpaProperties = new Properties();
-        jpaProperties.put(HIBERNATE_DIALECT, DIALECT);
+        jpaProperties.put(HIBERNATE_DIALECT, dialect);
         jpaProperties.put(HIBERNATE_HBM2DDL_AUTO, "update");
         jpaProperties.put(HIBERNATE_SHOW_SQL, "true");
         jpaProperties.put(HIBERNATE_FORMAT_SQL, "true");
