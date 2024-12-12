@@ -121,7 +121,6 @@ class MultiDatabaseIntegrationTest {
         registry.add("aggregate-hub.data-sources[0].url", postgres1::getJdbcUrl);
         registry.add("aggregate-hub.data-sources[0].user", postgres1::getUsername);
         registry.add("aggregate-hub.data-sources[0].password", postgres1::getPassword);
-        registry.add("aggregate-hub.data-sources[0].driverClassName", () -> "org.postgresql.Driver");
 
         // PostgreSQL DB2
         registry.add("aggregate-hub.data-sources[1].name", () -> "postgres-db-2");
@@ -129,7 +128,6 @@ class MultiDatabaseIntegrationTest {
         registry.add("aggregate-hub.data-sources[1].url", postgres2::getJdbcUrl);
         registry.add("aggregate-hub.data-sources[1].user", postgres2::getUsername);
         registry.add("aggregate-hub.data-sources[1].password", postgres2::getPassword);
-        registry.add("aggregate-hub.data-sources[1].driverClassName", () -> "org.postgresql.Driver");
         registry.add("aggregate-hub.data-sources[1].table", () -> "Postgres2User");
         registry.add("aggregate-hub.data-sources[1].mapping.id", () -> "Postgres2id");
         registry.add("aggregate-hub.data-sources[1].mapping.username", () -> "Postgres2Username");
@@ -142,7 +140,6 @@ class MultiDatabaseIntegrationTest {
         registry.add("aggregate-hub.data-sources[2].url", mysql1::getJdbcUrl);
         registry.add("aggregate-hub.data-sources[2].user", mysql1::getUsername);
         registry.add("aggregate-hub.data-sources[2].password", mysql1::getPassword);
-        registry.add("aggregate-hub.data-sources[2].driverClassName", () -> "com.mysql.cj.jdbc.Driver");
         registry.add("aggregate-hub.data-sources[2].table", () -> "MySql1User");
         registry.add("aggregate-hub.data-sources[2].mapping.id", () -> "MySql1id");
         registry.add("aggregate-hub.data-sources[2].mapping.username", () -> "MySql1Username");
@@ -155,7 +152,6 @@ class MultiDatabaseIntegrationTest {
         registry.add("aggregate-hub.data-sources[3].url", mysql2::getJdbcUrl);
         registry.add("aggregate-hub.data-sources[3].user", mysql2::getUsername);
         registry.add("aggregate-hub.data-sources[3].password", mysql2::getPassword);
-        registry.add("aggregate-hub.data-sources[3].driverClassName", () -> "com.mysql.cj.jdbc.Driver");
         registry.add("aggregate-hub.data-sources[3].table", () -> "testtablename");
         registry.add("aggregate-hub.data-sources[3].mapping.id", () -> "MySql2id");
         registry.add("aggregate-hub.data-sources[3].mapping.username", () -> "MySql2Username");

@@ -8,7 +8,9 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -76,10 +78,10 @@ public interface DatabaseStrategy {
     default void configureNamingStrategy(Properties jpaProperties, Map<String, String> mapping, String tableName) {
         logger.debug("Configuring naming strategy with tableName: {} and mapping: {}", tableName, mapping);
 
-        String tableMappingString = tableName == null ? null : "users=" + tableName;
-        String columnMappingString = mapping == null || mapping.isEmpty() ? null : mapping.toString();
+        Map<String, String> tableMapping = new HashMap<>();
+        tableMapping.put("users", Objects.nonNull(tableName) && !tableName.isBlank() ? tableName : "users");
 
-        CustomPhysicalNamingStrategy namingStrategy = new CustomPhysicalNamingStrategy(tableMappingString, columnMappingString);
+        CustomPhysicalNamingStrategy namingStrategy = new CustomPhysicalNamingStrategy(tableMapping, mapping);
         jpaProperties.put("hibernate.physical_naming_strategy", namingStrategy);
     }
 

@@ -6,7 +6,6 @@ import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,9 +20,9 @@ public class CustomPhysicalNamingStrategy extends PhysicalNamingStrategyStandard
     private final Map<String, String> columnMapping;
 
 
-    public CustomPhysicalNamingStrategy(String tableMappingString, String columnMappingString) {
-        this.tableMapping = parseMappingString(tableMappingString);
-        this.columnMapping = parseMappingString(columnMappingString);
+    public CustomPhysicalNamingStrategy(Map<String, String> tableMapping, Map<String, String> columnMapping) {
+        this.tableMapping = tableMapping;
+        this.columnMapping = columnMapping;
     }
 
     /**
@@ -70,26 +69,5 @@ public class CustomPhysicalNamingStrategy extends PhysicalNamingStrategyStandard
         }
 
         return super.toPhysicalColumnName(name, context);
-    }
-
-    private Map<String, String> parseMappingString(String mappingString) {
-        Map<String, String> map = new HashMap<>();
-        if (mappingString == null || mappingString.isEmpty()) {
-            return map;
-        }
-
-        mappingString = mappingString.trim();
-        if (mappingString.startsWith("{") && mappingString.endsWith("}")) {
-            mappingString = mappingString.substring(1, mappingString.length() - 1);
-        }
-
-        String[] entries = mappingString.split(", ");
-        for (String entry : entries) {
-            String[] kv = entry.split("=");
-            if (kv.length == 2) {
-                map.put(kv[0].trim(), kv[1].trim());
-            }
-        }
-        return map;
     }
 }
